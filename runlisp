@@ -1,0 +1,9 @@
+#! /bin/bash
+
+if [ -f /usr/bin/sbcl ]; then
+	/usr/bin/sbcl --noinform --disable-debugger --eval '(set-dispatch-macro-character #\# #\! (lambda (stream bang number) (declare (ignore bang number)) (read-line stream) t))' --load $1 --eval '(quit)'
+elif [ -f /usr/bin/lisp ]; then
+	/usr/bin/lisp -quiet -batch -noinit -eval '(set-dispatch-macro-character #\# #\! (lambda (stream bang number) (declare (ignore bang number)) (read-line stream) t))' -load $1 -eval '(quit)'
+else
+	echo "$0: could not find a Lisp I know how to call"
+fi
