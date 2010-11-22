@@ -1,0 +1,250 @@
+/*
+Copyright (c) 2005-2010, Christopher Mark Gore,
+All rights reserved.
+
+8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
+Web: http://cgore.com
+Email: cgore@cgore.com
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the name of Christopher Mark Gore nor the names of other
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
+blockquote
+{
+	margin-left: 7.5%;
+	margin-right: 7.5%;
+	font-style: italic;
+}
+address.quote
+{
+	margin-left: 50%;
+	margin-right: 7.5%;
+	font-style: italic;
+	font-weight: bold;
+}
+
+address.quote:before
+{
+	content: "--";
+}
+
+body
+{
+	background: #E6F2FF;
+	color: black;
+	font-family: 'Verdana', 'Helvetica', 'Arial', 'Geneva', sans-serif;
+	font-size: 10pt;
+	text-align: justify;
+	padding-left: 2em;
+	padding-right: 2em;
+}
+
+p
+{
+	font-family: 'Verdana', 'Helvetica', 'Arial', 'Geneva', sans-serif;
+	font-size: 10pt;
+	padding-left: 2em;
+	padding-right: 2em;
+}
+
+tt
+{
+	font-family: 'Courier', 'Courier New', monospace;
+}
+
+/* The a tags must be listed in this order for some stupid reason. */
+a
+{
+	text-decoration: underline;
+}
+
+a:link, a:visited
+{
+	color: #2C7CC6;
+}
+
+a:hover
+{
+	color: #4040ff;
+}
+
+a:active
+{
+	color: #ff8080;
+}
+
+a.toc
+{
+	display: block;
+	text-align: center;
+}
+
+#leftbar h1
+{
+	text-decoration: none;
+	display: block;
+	text-align: center;
+	margin: 1pt;
+	margin-left: 0pt;
+	margin-right: 0pt;
+	margin-bottom: 7.5%;
+	font-style: italic;
+	font-size: 20pt;
+	font-family: 'Verdana', 'Helvetica', 'Arial', 'Geneva', sans-serif;
+}
+
+#leftbar h1 a
+{
+	text-decoration: none;
+	background: #E6F2FF;
+}
+
+#leftbar a
+{
+	text-decoration: none;
+	display: block;
+	text-align: center;
+	background: #CCD9E6;
+	margin: 2px;
+	margin-left: 2px;
+	margin-right: 10%;
+	font-family: 'Verdana', 'Helvetica', 'Arial', 'Geneva', sans-serif;
+	font-style: italic;
+	font-weight: bold;
+	border: none;
+}
+
+#leftbar a:hover
+{
+	color: #4040ff;
+	background: white;
+}
+
+#leftbar a.normal, a.normal:hover
+{
+	text-decoration: underline;
+	display: inline;
+	background: #E6F2FF;
+	margin: 0;
+	margin-left: 0;
+	margin-right: 0;
+	font-family: 'Verdana', 'Helvetica', 'Arial', 'Geneva', sans-serif;
+	font-style: italic;
+	font-weight: bold;
+	border: none;
+}
+
+#leftbar hr
+{
+	width: 50%;
+	margin-left: 25%;
+	margin-right: 25%;
+	color: #d3d3d3;
+}
+
+h1, h2, h3, h4, h5, h6
+{
+	color: #2C7CC6;
+	font-family: 'Verdana', 'Helvetica', 'Arial', 'Geneva', sans-serif;
+	font-style: italic;
+	font-weight: bold;
+	text-shadow: darkblue 1px -1px 0;
+}
+
+h1
+{
+	text-align: center;
+}
+
+h1 a
+{
+	text-decoration: none;
+}
+
+img
+{
+	border: 0;
+}
+
+pre
+{
+	display: block;
+	white-space: pre;
+	font-family: 'Courier', 'Courier New', monospace;
+}
+
+pre.source
+{
+	color: black;
+/*	background: #eaf0ea;*/
+	background: white;
+	padding: 4pt;
+	margin: 4pt;
+	border: 5px solid gray;
+}
+
+pre.cli
+{
+	color: #c0c0c0;
+	background: black;
+	padding: 4pt;
+	margin: 4pt;
+	border: 5px solid gray;
+}
+
+dt
+{
+	font-weight: bold;
+}
+
+#leftbar
+{
+  float: left;
+  width: 250px;
+}
+
+#main
+{
+  margin-left: 250px;
+  margin-right: 15px;
+  margin-top: 15px;
+  margin-bottom 15px;
+}
+
+#main-with-ad
+{
+  margin-left: 250px;
+  margin-right: 200px;
+  margin-top: 15px;
+  margin-bottom 15px;
+}
+
+#wide-skyscraper-ad
+{
+  float: right;
+  width: 170px;
+}

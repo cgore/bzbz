@@ -1,0 +1,81 @@
+#! /bin/bash
+
+# Copyright (c) 2005-2010, Christopher Mark Gore,
+# All rights reserved.
+# 
+# 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
+# Web: http://cgore.com
+# Email: cgore@cgore.com
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+# 
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+# 
+#     * Neither the name of Christopher Mark Gore nor the names of other
+#       contributors may be used to endorse or promote products derived from
+#       this software without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+BZBZ_NO_FILE_ERROR=1
+BZBZ_NO_CONFIG_ERROR=2
+
+if [[ -z $1 ]]
+then
+    echo "ERROR: This must be called from a file, or passed a filename as input."
+    exit ${BZBZ_NO_FILE_ERROR}
+fi
+
+# We store our current directory so that we can go back to it later.
+BZBZ_CGIDIR=$(pwd)
+
+# We will walk up the directories until we find a bzbz.config file.  This file
+# must exist in the top-level directory, even if it is empty, so that this
+# script can locate the top-level directory.  It is also useful for changing
+# configuration defaults.
+while [[ ( ! -e "bzbz.config" ) && ( "/" != $(pwd) ) ]]
+do
+    cd ..
+done
+if [[ "/" == $(pwd) ]]
+then
+    echo "ERROR: There is no bzbz.config file present."
+    exit ${BZBZ_NO_CONFIG_ERROR}
+fi
+
+BZBZ_TOPDIR=$(pwd)
+
+BZBZ_CONFIG="${BZBZ_TOPDIR}/bzbz.config"
+BZBZ_CORE="${BZBZ_TOPDIR}/source/bzbz.core"
+
+. "${BZBZ_CONFIG}"
+
+cd ${BZBZ_CGIDIR}
+
+/usr/bin/sbcl \
+    --core ${BZBZ_CORE} \
+    --noinform \
+    --disable-debugger \
+    --eval '(set-dispatch-macro-character
+              #\# #\!
+              (lambda (stream bang number)
+                (declare (ignore bang number))
+                (read-line stream)
+                t))' \
+    --load $1 --eval '(quit)'
