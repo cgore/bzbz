@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2005-2010, Christopher Mark Gore,
+;;;; Copyright (c) 2005 -- 2011, Christopher Mark Gore,
 ;;;; All rights reserved.
 ;;;; 
 ;;;; 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
@@ -34,98 +34,27 @@
 (load "utilities")
 (defpackage :html
   (:use :common-lisp #+sbcl :sb-ext :utilities)
-  (:export :newline
-           :to-string
-           :tag-equal?
-           :multiline-tag?
-           :newline-tag?
-           :tag-must-close?
-           :html
-           :html-comment
-           :!--
-           :html-content-header
-           :simple-tag-functor
-
-           :abbr
-           :acronym
-           :b
-           :base
-           :body
-           :br
-           :cite
-           :dd
-           :div
-           :dl
-           :dfn
-           :dt
-           :em
-           :html-comment
-           :h1
-           :h2
-           :h3
-           :h4
-           :head
-           :hr
-           :i
-           :kbd
-           :li
-           :link
-           :ol
-           :p
-           :pre
-           :html-quote
-           :samp
-           :strong
-           :sub
-           :sup
-           :table
-           :td
-           :th
-           :tr
-	   :tt
-           :ul
-           :html-var
-
-           :hidden-input
-           :password-input
-           :radio-input
-           :radio-inputs
-           :submit-input
-           :text-input
-           :label
-           :p-left
-           :cr
-           :command-line
-           :source
-           :ol-from-list
-           :ol-from-rest
-           :ul-from-list
-           :ul-from-rest
-           :dl-from-pairs
-           :dl-from-rest
-           :href
-           :ul-href
-           :mailto
-           :img
-           :javascript
-           :load-javascript
-           :link-css
-           :url-decode
-           :site-name ; Redefine this one locally.
-           :site-css ; Redefine this one locally.
-           :canonical-site-address ; Redefine this one locally.
-           :title?
-           :hier-h1
-           :basic-webpage
-           :webpage-without-login
-           :standard-head
-           :book-title))
+  (:export :!-- :abbr :acronym :b :base :basic-webpage :body :book-title :br
+    :canonical-site-address ; NOTE: You need to redefine this one locally.
+    :cite :command-line :cr :dd :dfn :div :dl :dl-from-pairs :dl-from-rest :dt
+    :em :h1 :h2 :h3 :h4 :head :hidden-input :hier-h1 :hr :href :html
+    :html-comment :html-comment :html-content-header :html-quote :html-var :i
+    :img :javascript :kbd :label :li :link :link-css :load-javascript :mailto
+    :multiline-tag?  :newline :newline-tag?  :ol :ol-from-list :ol-from-rest :p
+    :password-input :p-left :pre :radio-input :radio-inputs :samp
+    :simple-tag-functor
+    :site-css ; NOTE: You need to redefine this one locally.
+    :site-name ; NOTE: You need to redefine this one locally.
+    :source :standard-head :strong :sub :submit-input :sup :table :tag-equal?
+    :tag-must-close?  :td :text-input :th :title?  :to-string :tr :tt :ul
+    :ul-from-list :ul-from-rest :ul-href :url-decode :webpage-without-login))
 (in-package :html)
 
 (defun newline ()
   (format t "~%"))
 
 (defun to-string (s)
+  "Converts common types of things into a string."
   (cond ((null s) "")
         ((symbolp s) (string-downcase (symbol-name s)))
         ((stringp s) s)
@@ -230,9 +159,11 @@
       result)))
 
 (defun html-comment (&rest rest)
+  "This generates and HTML style inline comment."
   (apply #'strcat (append '("<!-- ") (mapcar #'to-string rest) '(" -->"))))
 
 (defun !-- (&rest rest)
+  "This generates and HTML style inline comment."
   (apply #'html-comment rest))
 
 (defun html-content-header nil
@@ -244,9 +175,31 @@
 (defun html-xml-doctype-header nil
   (format t "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1.dtd\">~%"))
 
-(defmacro simple-tag-functor (function tag)
-  `(defun ,function (&rest rest)
-     (apply #'html ,tag rest)))
+(defmacro simple-tag-functor (function-name &optional tag)
+  `(let* ((name (symbol-name ,function-name)) ; The string representation.
+          (tag (string-downcase (if ,tag ,tag name)))) ; The tag as a string.
+     (intern name) ; Intern it as a symbol.
+     (let ((function (find-symbol name))) ; Get the newly-interned symbol.
+       (eval `(defun ,function (&rest rest) ; Define the function.
+                (apply #'html ,tag rest))))))
+
+(mapcar (lambda (tag)
+          (simple-tag-functor tag))
+        '(:b :base :body :br :cite :dd :dl :dfn :dt :em :h1 :h2 :h3 :h4 :hr
+             :head :i :kbd :li :link :ol :p :pre :samp :strong :sub :sup :table
+             :td :th :tr :tt :ul))
+
+;; The HTML <quote> element.
+;; QUOTE is already a (very important) function in Lisp, so we will not be able
+;; to redefine it here: instead we will define a function named HTML-QUOTE to
+;; avoid a naming confict.
+(simple-tag-functor :html-quote :quote)
+
+;; The HTML <var> element.
+;; This styles a computer program variable.
+;; VAR is used by SBCL's debugging system, so we won't redefine it here:
+;; instead we'll define a function named HTML-VAR to avoid a naming confict.
+(simple-tag-functor :html-var :var)
 
 (defun abbr (lang title &rest rest)
   (apply #'html :abbr `(("lang" ,lang) ("title" ,title)) rest))
@@ -254,98 +207,13 @@
 (defun acronym (lang title &rest rest)
   (apply #'html :acronym `(("lang" ,lang) ("title" ,title)) rest))
 
-(simple-tag-functor b :b)
-
-(simple-tag-functor base :base)
-
 ;; The HTML <blink> element.
 ;; BLINK was never a standard tag, and we will therefore not include it.  The
 ;; correct way to cause the text to blink is now to use CSS, specifically
 ;; {text-decoration: blink}, or even better not at all.
 
-(simple-tag-functor body :body)
-
-(simple-tag-functor br :br)
-
-(simple-tag-functor cite :cite)
-
-(simple-tag-functor dd :dd)
-
 (defun div (id &rest rest)
   (apply #'html :div `(("id" ,id)) rest))
-
-(simple-tag-functor dl :dl)
-
-(simple-tag-functor dfn :dfn)
-
-(simple-tag-functor dt :dt)
-
-(simple-tag-functor em :em)
-
-(simple-tag-functor h1 :h1)
-
-(simple-tag-functor h2 :h2)
-
-(simple-tag-functor h3 :h3)
-
-(simple-tag-functor h4 :h4)
-
-(simple-tag-functor hr :hr)
-
-(simple-tag-functor head :head)
-
-(simple-tag-functor i :i)
-
-(simple-tag-functor kbd :kbd)
-
-(simple-tag-functor li :li)
-
-(simple-tag-functor link :link)
-
-(simple-tag-functor ol :ol)
-
-(simple-tag-functor p :p)
-
-(simple-tag-functor pre :pre)
-
-;; The HTML <quote> element.
-;; QUOTE is already a (very important) function in Lisp, so we will not be able
-;; to redefine it here: instead we will define a function named HTML-QUOTE to
-;; avoid a naming confict.
-(simple-tag-functor html-quote :quote)
-
-(simple-tag-functor samp :samp)
-
-(simple-tag-functor strong :strong)
-
-(simple-tag-functor sub :sub)
-
-(simple-tag-functor sup :sup)
-
-(simple-tag-functor table :table)
-
-(simple-tag-functor td :td)
-
-(simple-tag-functor th :th)
-
-(simple-tag-functor tr :tr)
-
-(simple-tag-functor tt :tt)
-
-;; The HTML <u> element.
-;; U is deprecated in HTML 4.0 Transitional and invalid in HTML 4.0 Strict, and
-;; we will therefore not include it.  The correct way to underline text is now
-;; to use CSS, specifically {text-decoration: underline}.
-
-;; The HTML <ul> element.
-;; This encloses all of the elements in an unordered list.
-(simple-tag-functor ul :ul)
-
-;; The HTML <var> element.
-;; This styles a computer program variable.
-;; VAR is used by SBCL's debugging system, so we won't redefine it here:
-;; instead we'll define a function named HTML-VAR to avoid a naming confict.
-(simple-tag-functor html-var :var)
 
 (defun hidden-input (name &optional (value ""))
   (html :input `(("type" "hidden") ("name" ,name) ("value" ,value))))
