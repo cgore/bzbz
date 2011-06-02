@@ -78,6 +78,10 @@
               :test #'tag-equal?)))
 
 (defun tag-must-close? (tag)
+  "This predicate indicates if the tag passed in must have a closing tag
+  instead of just self-closing.  That is, you MUST do <tag></tag> even if
+  there isn't any body contained in the tag, and you can't just do <tag/>.
+  As far as I know only the 'link' and 'script' tags are this stupid."
   (member tag '(link script) :test #'tag-equal?))
 
 (defun html (tag &rest rest)
@@ -159,12 +163,12 @@
       result)))
 
 (defun html-comment (&rest rest)
-  "This generates and HTML style inline comment."
+  "This generates and HTML style inline comment.  Usually you don't want to
+  even really use this, you should just be using normal Lisp comments in your
+  code, but hey, do what you want."
   (apply #'strcat (append '("<!-- ") (mapcar #'to-string rest) '(" -->"))))
 
-(defun !-- (&rest rest)
-  "This generates and HTML style inline comment."
-  (apply #'html-comment rest))
+(function-alias '!-- 'html-comment)
 
 (defun html-content-header nil
   (format t "Content-type: text/html~%"))
@@ -176,6 +180,23 @@
   (format t "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1.dtd\">~%"))
 
 (defmacro simple-tag-functor (function-name &optional tag)
+  "This macro is used to construct the vast majority of the HTML tag helpers.
+
+  If you want to have:
+    (foo \"some stuff\")
+  give you:
+    \"<foo>some stuff</foo>\"
+  then all you need to do is:
+    (simple-tag-functor :foo)
+  
+  Optionally, if you need to have the function named something different, use
+  the form:
+    (simple-tag-functor :bar :foo)
+  and then
+    (bar \"some stuff\")
+  will generate:
+    \"<foo>some stuff</foo>\""
+  ;;; TODO: There has to be a simpler way to write this macro.
   `(let* ((name (symbol-name ,function-name)) ; The string representation.
           (tag (string-downcase (if ,tag ,tag name)))) ; The tag as a string.
      (intern name) ; Intern it as a symbol.
@@ -183,6 +204,7 @@
        (eval `(defun ,function (&rest rest) ; Define the function.
                 (apply #'html ,tag rest))))))
 
+;; All of these functions correspond to their appropriate HTML tags.
 (mapcar (lambda (tag)
           (simple-tag-functor tag))
         '(:b :base :body :br :cite :dd :dl :dfn :dt :em :h1 :h2 :h3 :h4 :hr
@@ -259,9 +281,11 @@
   "
 ")
 
+;;; TODO: Move this out of here, it isn't basic HTML stuff, it is a shortcut.
 (defun command-line (&rest rest)
   (apply #'pre '((:class "cli")) rest))
 
+;;; TODO: Move this out of here, it isn't basic HTML stuff, it is a shortcut.
 (defun source (&rest rest)
   (apply #'pre '((:class "source")) rest))
 
@@ -348,13 +372,17 @@
                (url-decode-recursor (nthcdr 3 remaining))))
         (t (cons (first remaining) (url-decode-recursor (rest remaining))))))
 
+;;; TODO: Move this out of here, it isn't basic HTML, it is BzBz-specific.
 (defun url-decode (encoded-string)
   (coerce (url-decode-recursor (coerce encoded-string 'list)) 'string))
 
+;;; TODO: Move this out of here, it isn't basic HTML, it is BzBz-specific.
 (defun site-name () "Default Site Name")
 
+;;; TODO: Move this out of here, it isn't basic HTML, it is BzBz-specific.
 (defun canonical-site-address () "http://www.example.com")
 
+;;; TODO: Move this out of here, it isn't basic HTML, it is BzBz-specific.
 (defun site-css () (link-css "/default.css"))
 
 (defun title? (title)
@@ -362,6 +390,7 @@
       (and (listp title)
            (every #'stringp title))))
 
+;;; TODO: Move this out of here, it isn't basic HTML, it is BzBz-specific.
 (defun hier-h1 (index? &rest title)
   "This generates a linked hierarchal H1 header."
   (assert (title? title))
@@ -389,6 +418,7 @@
                                 (decf i)))
                             (cons (site-name) title)))))))
 
+;;; TODO: Move this out of here, it isn't basic HTML, it is BzBz-specific.
 (defun basic-webpage (&rest rest)
   (html-content-header)
   (newline)
@@ -403,6 +433,7 @@
   (html-content-header)
   (apply #'basic-webpage rest))
 
+;;; TODO: Move this out of here, it isn't basic HTML stuff, it is a shortcut.
 (defun standard-head (title &rest rest)
   (assert (title? title))
   (apply #'head
@@ -414,5 +445,6 @@
          (site-css)
          rest))
 
+;;; TODO: Move this out of here, it isn't basic HTML stuff, it is a shortcut.
 (defun book-title (&rest rest)
   (apply #'b rest))

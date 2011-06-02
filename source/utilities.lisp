@@ -148,9 +148,12 @@
              :escape-tildes)))
 (in-package :utilities)
 
-(defun function-alias (alias function)
-  "This produces an alias for a function, an alternate name."
-  (setf (fdefinition alias) (fdefinition function)))
+(defun function-alias (function &rest aliases)
+  "This produces one or more aliases (alternate names) for a function.
+  For example, you might do something like:
+    (function-alias 'that-guy-doesnt-know-when-to-stop-typing 'shorter)"
+  (loop for alias in aliases
+        do (setf (fdefinition alias) (fdefinition function))))
 
 (defun fractional-value (number)
   "This is the fractional value formula most familiar to most mathematicians.
