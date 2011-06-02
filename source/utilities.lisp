@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2005-2010, Christopher Mark Gore,
+;;;; Copyright (c) 2005 -- 2011, Christopher Mark Gore,
 ;;;; All rights reserved.
 ;;;; 
 ;;;; 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
@@ -35,117 +35,27 @@
   (defpackage :utilities
     (:nicknames :util)
     (:use :common-lisp #+cmu :extensions #+sbcl :sb-ext)
-    (:export :function-alias
-             :fractional-value
-             :fractional-part
-             :nth-from-end
-             :swap
-             :swap-when
-             :swap-unless
-             :?
-             :toggle
-             :[?]
-             :bit?
-             :nonnegative?
-             :positive-integer
-             :positive-integer?
-             :nonnegative-integer
-             :nonnegative-integer?
-             :unsigned-integer
-             :positive-float
-             :nonnegative-float
-             :probability
-             :probability?
-             :decaying-probability?
-             :while
-             :until
-             :do-while
-             :do-until
-             :for
-             :it
-             :a?if
-             :aif
-             :a?when
-             :awhen
-             :a?while
-             :awhile
-             :a?and
-             :aand
-             :acond
-             :alambda
-             :ablock
-             :set-nthcdr
-             :opf
-             :multf
-             :divf
-             :sequence?
-             :empty-sequence?
-             :the-last
-             :sum
-             :product
-             :duplicate
-             :multicond
-             :list-to-vector
-             :vector-to-list
-             :simple-vector-to-list
-             :random-element
-             :minimum
-             :maximum
-             :minimum?
-             :maximum?
-             :random-in-range
-             :random-in-ranges
-             :random-range
-             :best
-             :worst
-             :integer-range
-             :prepackage
-             :forever
-             :nconcf
-             :set-equal
-             :rcompose
-             :compose
-             :disjoin
-             :conjoin
-             :curry
-             :rcurry
-             :split
-             :snap-index
-             :randomize-array
-             :random-array
-             :nthable?
-             :arefable?
-             :sort-on
-             :shuffle
-             :nshuffle
-             :sort-order
-             :similar-points?
-             :raster-line
-             :next-point
-             :norm
-             :distance
-             :array-values
-             :time-series?
-             :time-multiseries?
-             :time-multiseries
-             :tmsref
-             :tms-values
-             :tms-dimensions
-             :array-raster-line
-             :slice
-             :read-lines
-             :strcat
-             :strmult
-             :deletef
-             :operator-to-function
-             :replace-char
-             :stringify
-             :otherwise-nil
-             :aif-otherwise-nil
-             :character-range
-             :character-ranges
-             :string-join
-             :escape-tildes)))
+    (:export
+      :? :[?] :aand :a?and :ablock :acond :aif :a?if :aif-otherwise-nil
+      :alambda :arefable? :array-raster-line :array-values :awhen :a?when
+      :awhile :a?while :best :bit? :character-range :character-ranges :compose
+      :conjoin :curry :decaying-probability? :deletef :disjoin :distance :divf
+      :do-until :do-while :duplicate :empty-sequence? :escape-tildes :for
+      :forever :fractional-part :fractional-value :function-alias
+      :function-aliases :integer-range :it :list-to-vector :maximum :maximum?
+      :minimum :minimum?  :multf :multicond :nconcf :next-point :nonnegative?
+      :nonnegative-float :nonnegative-integer :nonnegative-integer? :norm
+      :nshuffle :nthable?  :nth-from-end :operator-to-function :opf
+      :otherwise-nil :positive-float :positive-integer :positive-integer?
+      :prepackage :probability :probability? :product :random-array
+      :random-element :random-in-range :random-in-ranges :randomize-array
+      :random-range :raster-line :rcompose :rcurry :read-lines :replace-char
+      :sequence? :set-equal :set-nthcdr :shuffle :similar-points?
+      :simple-vector-to-list :slice :snap-index :sort-on :sort-order :split
+      :strcat :stringify :string-join :strmult :sum :swap :swap-unless
+      :swap-when :the-last :time-multiseries :time-multiseries? :time-series?
+      :tms-dimensions :tmsref :tms-values :toggle :unsigned-integer :until
+      :vector-to-list :while :worst)))
 (in-package :utilities)
 
 (defun function-alias (function &rest aliases)
@@ -154,6 +64,8 @@
     (function-alias 'that-guy-doesnt-know-when-to-stop-typing 'shorter)"
   (loop for alias in aliases
         do (setf (fdefinition alias) (fdefinition function))))
+
+(function-alias 'function-alias 'function-aliases) ; This line seemed fitting.
 
 (defun fractional-value (number)
   "This is the fractional value formula most familiar to most mathematicians.

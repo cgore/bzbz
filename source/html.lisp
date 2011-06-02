@@ -168,7 +168,7 @@
   code, but hey, do what you want."
   (apply #'strcat (append '("<!-- ") (mapcar #'to-string rest) '(" -->"))))
 
-(function-alias '!-- 'html-comment)
+(function-alias 'html-comment '!--)
 
 (defun html-content-header nil
   (format t "Content-type: text/html~%"))
