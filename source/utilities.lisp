@@ -60,8 +60,8 @@
 
 (defun function-alias (function &rest aliases)
   "This produces one or more aliases (alternate names) for a function.
-  For example, you might do something like:
-    (function-alias 'that-guy-doesnt-know-when-to-stop-typing 'shorter)"
+For example, you might do something like:
+> (function-alias 'that-guy-doesnt-know-when-to-stop-typing 'shorter)"
   (loop for alias in aliases
         do (setf (fdefinition alias) (fdefinition function))))
 
@@ -69,13 +69,13 @@
 
 (defun fractional-value (number)
   "This is the fractional value formula most familiar to most mathematicians.
-  Note that the result of this is always positive, forming a sawtooth."
+Note that the result of this is always positive, forming a sawtooth."
   (assert (numberp number))
   (- number (floor number)))
 
 (defun fractional-part (number)
   "This is the fractional part formula most familiar to computer scientists.
-  It possesses the useful feature that frac(x)+int(x)=x, but may be negative."
+It possesses the useful feature that frac(x)+int(x)=x, but may be negative."
   (assert (numberp number))
   (if (minusp number)
     (- number (floor number) 1)
@@ -83,15 +83,36 @@
 
 (defun nth-from-end (n list)
   "This macro is similar to NTH, but counting from the back."
+  (assert (integerp n))
+  (assert (<= 0 n))
+  (assert (listp list))
   (maplist #'(lambda (a b)
                (when (null (rest b))
                  (return-from nth-from-end (first a))))
            list (nthcdr n list)))
 
+(defun nth-from-end.tests ()
+  (assert (equal (nth-from-end 0 (integer-range 10))
+                 10))
+  (assert (equal (nth-from-end 3 (integer-range 10))
+                 7))
+  (assert (equal (nth-from-end 10 (integer-range 10))
+                 0))
+  (assert (equal (nth-from-end 11 (integer-range 10))
+                 nil)))
+
 (defmacro swap (x y)
-  "A simple SWAP macro."
+  "A simple SWAP macro.  The values of the first form and the second form are
+swapped with each other."
   `(psetf ,x ,y
           ,y ,x))
+
+(defun swap.tests ()
+  (let ((x 15)
+        (y 37))
+    (swap x y)
+    (assert (= y 15))
+    (assert (= x 37))))
 
 (defmacro swap-when (predicate x y)
   "This macro calls SWAP only when the predicate evaluates to true."
@@ -107,14 +128,16 @@
 
 (defmethod ? (x)
   "This turns a generalized truth value (NIL, anything else) into a traditional
-  Lisp-style simplistic truth value (NIL, T)."
+Lisp-style simplistic truth value (NIL, T)."
   (if x t nil))
 
 (defun toggle (x)
   (if x nil t))
 
 (defun [?] (x)
-  "This is Knuth's truth function."
+  "This is Knuth's truth function.  It converts it's input to 1 for true and 0
+for false based upon its truth value.  In other words, NIL -> 0 and everything
+else -> 1."
   (if x 1 0))
 
 (defun bit? (b)
@@ -177,19 +200,19 @@
 
 (defmacro do-until (conditional &rest body)
   "A DO-UNTIL loop construct; it operates like do {BODY} while (! CONDITIONAL)
-  construct in the C programming language."
+construct in the C programming language."
   `(do-while (not ,conditional)
      ,@body))
 
 (defmacro for (initial conditional step-action &rest body)
   "A FOR macro, much like the ``for'' in the C programming language.
-  A simple example:
-    (for ((i 0))
-         (< i 10)
-         (incf i)
-      (format t \"~%~A\" i))
-  prints the numbers from 0 through 9, each on their own lines.
-  Generally this should not be used, but instead the native looping methods."
+A simple example:
+  (for ((i 0))
+       (< i 10)
+       (incf i)
+    (format t \"~%~A\" i))
+prints the numbers from 0 through 9, each on their own lines.
+Generally this should not be used, but instead the native looping methods."
   `(let ,initial
      (while ,conditional
        (prog1 (progn ,@body) ,step-action))))
@@ -277,15 +300,15 @@
 
 (defmacro opf (operator variable &rest arguments)
   "OPF is a generic operate-and-store macro, along the lines of INCF and DECF,
-  but allowing for any operation.  For example:
-    (opf #'+ foo 42)
-  does something like
-    (incf foo 42)
-  but you could also do
-    (opf #'+ foo 1 2 3 4 5)
-  with it doing the obvious thing, whereas you cannot do
-    (incf foo 1 2 3 4 5)
-  in any Common Lisp I have used."
+but allowing for any operation.  For example:
+  (opf #'+ foo 42)
+does something like
+  (incf foo 42)
+but you could also do
+  (opf #'+ foo 1 2 3 4 5)
+with it doing the obvious thing, whereas you cannot do
+  (incf foo 1 2 3 4 5)
+in any Common Lisp I have used."
   `(setf ,variable
          (funcall ,operator ,variable ,@arguments)))
 
@@ -427,7 +450,7 @@
 
 (defun random-in-range (lower upper)
   "This function returns a random number in the range [lower, upper).  Lower
-  and upper may both be sequences, in which case their most extreme members."
+and upper may both be sequences, in which case their most extreme members."
   (when (sequence? lower)
     (setf lower (maximum lower)))
   (when (sequence? upper)
@@ -443,7 +466,7 @@
    
 (defun random-in-ranges (&rest ranges)
   "This function, given many restricting ranges all as two-element lists, will
-  return a random number in the range that is a common subset to all of them."
+return a random number in the range that is a common subset to all of them."
   (let ((lower (minimum ranges :key #'minimum))
         (upper (maximum ranges :key #'maximum)))
     (random-in-range lower upper)))
@@ -468,8 +491,8 @@
 
 (defmethod best ((list list) predicate &key (key #'identity))
   "This returns the ``best'' element in a list.  This is equivalent to, but
-  faster than (O(n) vs. O(n*lg(n))), taking the first element after sorting the
-  sequence with the same predicate and key."
+faster than (O(n) vs. O(n*lg(n))), taking the first element after sorting the
+sequence with the same predicate and key."
   (when (null list)
     (return-from best nil))
   (let ((best (first list)))
@@ -482,8 +505,8 @@
 
 (defmethod best ((vector vector) predicate &key (key #'identity))
   "This returns the ``best'' element in a vector.  This is equivalent to, but
-  faster than (O(n) vs. O(n*lg(n))), taking the first element after sorting the
-  sequence with the same predicate and key."
+faster than (O(n) vs. O(n*lg(n))), taking the first element after sorting the
+sequence with the same predicate and key."
   (when (zerop (length vector))
     (return-from best nil))
   (let ((best (aref vector 0)))
@@ -498,8 +521,8 @@
 
 (defmethod worst ((list list) predicate &key (key #'identity))
   "This returns the ``worst'' element in a list.  This is equivalent to, but
-  faster than (O(n) vs. O(n*lg(n))), taking the last element after sorting the
-  sequence with the same predicate and key."
+faster than (O(n) vs. O(n*lg(n))), taking the last element after sorting the
+sequence with the same predicate and key."
   (when (null list)
     (return-from worst nil))
   (let ((worst (first list)))
@@ -512,8 +535,8 @@
 
 (defmethod worst ((vector vector) predicate &key (key #'identity))
   "This returns the ``worst'' element in a vector.  This is equivalent to, but
-  faster than (O(n) vs. O(n*lg(n))), taking the last element after sorting the
-  sequence with the same predicate and key."
+faster than (O(n) vs. O(n*lg(n))), taking the last element after sorting the
+sequence with the same predicate and key."
   (when (zerop (length vector))
     (return-from worst nil))
   (let ((worst (aref vector 0)))
@@ -526,11 +549,25 @@
 
 (defun integer-range (x &optional y z)
   "This function generates lists of integer ranges of the form [start, stop].
-  It has three forms:
-    (RANGE stop)
-    (RANGE start stop)
-    (RANGE start stop step)
-  Negative numbers are allowed, and operate in a logical manner."
+It has three forms:
+
+First form: (integer-range stop)
+> (integer-range 10)
+=> '(0 1 2 3 4 5 6 7 8 9 10)
+
+Second form: (integer-range start stop)
+> (integer-range 5 10)
+=> '(5 6 7 8 9 10)
+
+Third form: (integer-range start stop step)
+> (integer-range 5 10 2)
+=> '(5 7 9)
+
+Negative numbers are allowed, and operate in a logical manner.
+> (integer-range -5 0)
+=> '(-5 -4 -3 -2 -1 0)
+> (integer-range 10 5 -1)
+=> '(10 9 8 7 6 5) "
   (let (start stop step)
     (flet ((step-function ()
              (if (< start stop) 1 -1)))
@@ -550,6 +587,28 @@
              (and (minusp step)
                   (< i stop)))
          (reverse range))))))
+
+(defun integer-range.tests ()
+  (assert (equal (integer-range 5)
+                 '(0 1 2 3 4 5)))
+  (assert (equal (integer-range 5 10)
+                 '(5 6 7 8 9 10)))
+  (assert (equal (integer-range 5 10 2)
+                 '(5 7 9)))
+  (assert (equal (integer-range -5)
+                 '(0 -1 -2 -3 -4 -5)))
+  (assert (equal (integer-range -5 0)
+                 '(-5 -4 -3 -2 -1 0)))
+  (assert (equal (integer-range 10 5)
+                 '(10 9 8 7 6 5)))
+  (assert (equal (integer-range 10 5 1)
+                 nil))
+  (assert (equal (integer-range 5 10 -1)
+                 nil))
+  (assert (equal (integer-range -5 5)
+                 '(-5 -4 -3 -2 -1 0 1 2 3 4 5)))
+  (assert (equal (integer-range -5 5 2)
+                 '(-5 -3 -1 1 3 5))))
 
 (defmacro forever (&rest body)
   `(while t ,@body))
@@ -585,19 +644,19 @@
 
 (defun compose (&rest functions)
   "This function composes a single function from a list of several functions
-  such that the new function is equivalent to calling the functions in
-  succession.  This is based upon a COMPOSE function in Paul Graham's ``ANSI
-  Common Lisp'' which is  based upon the compose function from Dylan, a
-  programming language which he describes as a ``cross between Scheme and Common
-  Lisp, with a syntax like Pascal.''"
+such that the new function is equivalent to calling the functions in
+succession.  This is based upon a COMPOSE function in Paul Graham's ``ANSI
+Common Lisp'' which is  based upon the compose function from Dylan, a
+programming language which he describes as a ``cross between Scheme and Common
+Lisp, with a syntax like Pascal.''"
   (apply #'rcompose (reverse functions)))
 
 (defun disjoin (predicate &rest predicates)
   "This function takes in one or more predicates, and returns a predicate that
-  returns true whenever any of the predicates return true.  This is from Paul
-  Graham's ``ANSI Common Lisp'' and is based upon the disjoin function from
-  Dylan, a programming language which he describes as a ``cross between Scheme
-  and Common Lisp, with a syntax like Pascal.''"
+returns true whenever any of the predicates return true.  This is from Paul
+Graham's ``ANSI Common Lisp'' and is based upon the disjoin function from
+Dylan, a programming language which he describes as a ``cross between Scheme
+and Common Lisp, with a syntax like Pascal.''"
   (assert (or (functionp predicate)
               (symbolp predicate)))
   (dolist (predicate predicates)
@@ -612,10 +671,10 @@
 
 (defun conjoin (predicate &rest predicates)
   "This function takes in one or more predicates, and returns a predicate that
-  returns true whenever all of the predicates return true.  This is from Paul
-  Graham's ``ANSI Common Lisp'' and is based upon the conjoin function from
-  Dylan, a programming language which he describes as a ``cross between Scheme
-  and Common Lisp, with a syntax like Pascal.''"
+returns true whenever all of the predicates return true.  This is from Paul
+Graham's ``ANSI Common Lisp'' and is based upon the conjoin function from
+Dylan, a programming language which he describes as a ``cross between Scheme
+and Common Lisp, with a syntax like Pascal.''"
   (assert (or (functionp predicate)
               (symbolp predicate)))
   (dolist (predicate predicates)
@@ -630,10 +689,10 @@
 
 (defun curry (function &rest arguments)
   "This function takes in a function and some of its arguments, and returns a
-  function that expects the rest of the required arguments.  This is from Paul
-  Graham's ``ANSI Common Lisp'' and is based upon the curry function from
-  Dylan, a programming language which he describes as a ``cross between Scheme
-  and Common Lisp, with a syntax like Pascal.''"
+function that expects the rest of the required arguments.  This is from Paul
+Graham's ``ANSI Common Lisp'' and is based upon the curry function from
+Dylan, a programming language which he describes as a ``cross between Scheme
+and Common Lisp, with a syntax like Pascal.''"
   (assert (or (functionp function)
               (symbolp function)))
   #'(lambda (&rest more-arguments)
@@ -641,10 +700,10 @@
 
 (defun rcurry (function &rest arguments)
   "This function takes in a function and some of its ending arguments, and
-  returns a function that expects the rest of the required arguments.  This is
-  from Paul Graham's ``ANSI Common Lisp'' and is based upon the rcurry function
-  from Dylan, a programming language which he describes as a ``cross between
-  Scheme and Common Lisp, with a syntax like Pascal.''"
+returns a function that expects the rest of the required arguments.  This is
+from Paul Graham's ``ANSI Common Lisp'' and is based upon the rcurry function
+from Dylan, a programming language which he describes as a ``cross between
+Scheme and Common Lisp, with a syntax like Pascal.''"
   (assert (or (functionp function)
               (symbolp function)))
   #'(lambda (&rest more-arguments)
@@ -659,8 +718,8 @@
                    (test #'eql)
                    (remove-separators? t))
   "This splits LIST on the SEPERATORS, returning a list of all the fields.
-  The optional KEY and TEST arguments are for the comparison of items in the
-  SEQUENCE for membership in the SEPERATORS."
+The optional KEY and TEST arguments are for the comparison of items in the
+SEQUENCE for membership in the SEPERATORS."
   (assert (not (null list)))
   (assert (not (null separators)))
   (unless (listp separators)
@@ -800,9 +859,9 @@
                      (from-start 0)
                      (from-end 0))
   "This is derived from the algorithm for raster conversion of a 3D line as
-  found in ``3D Scan-Conversion Algorithms for Voxel-Based Graphics'' by
-  Arie Kaufman and Eyal Shimony, 1986 Workshop on Interactive 3D Graphics.
-  Here it should work for any any n-dimensional space where n is non-negative."
+found in ``3D Scan-Conversion Algorithms for Voxel-Based Graphics'' by
+Arie Kaufman and Eyal Shimony, 1986 Workshop on Interactive 3D Graphics.
+Here it should work for any any n-dimensional space where n is non-negative."
   (assert (similar-points? start-point end-point coordinate-assertion))
   (assert (integerp from-end))
   (when (equalp start-point end-point)
@@ -888,7 +947,7 @@
 
 (defun norm (sequence &optional (power 2))
   "This function returns the mathematical vector norm of a sequence.  For the
-  infinity norm, use :INFINITY for the power."
+infinity norm, use :INFINITY for the power."
   (cond ((equalp power :infinity)
          (apply #'max sequence))
         ((numberp power)
@@ -903,7 +962,7 @@
 
 (defun array-values (array positions)
   "This function returns a list of the values in array found at the specified
-  positions."
+positions."
   (assert (arrayp array))
   (assert (listp positions))
   (mapcar #'(lambda (position)
@@ -915,15 +974,15 @@
 
 (defun time-series? (time-series &optional (element-type t))
   "The TIME-SERIES? predicate returns true if the argument could be a time
-  series."
+series."
   (and (listp time-series)
        (not (null time-series))
        (every (rcurry #'typep element-type) time-series)))
 
 (defun time-multiseries? (time-multiseries)
   "This predicate returns true if the argument is a time multiseries
-  (multivariate time series), which we represent as a list of arrays of equal
-  dimensions, where each array represents data from a single time step."
+(multivariate time series), which we represent as a list of arrays of equal
+dimensions, where each array represents data from a single time step."
   (and (listp time-multiseries)
        (not (null time-multiseries))
        (every #'arrayp time-multiseries)
@@ -937,9 +996,9 @@
 
 (defun tmsref (time-multiseries time &rest position)
   "This function works like AREF, but for a time series or multiseries.  The
-  time multiseries is represented as a list of arrays, where there is an array
-  for each time step representing all of the data for that step in time.
-  A time series is represented as a list."
+time multiseries is represented as a list of arrays, where there is an array
+for each time step representing all of the data for that step in time.
+A time series is represented as a list."
   (assert (or (time-multiseries? time-multiseries)
               (and (listp time-multiseries)
                    (null position))))
@@ -951,10 +1010,10 @@
 
 (defun tms-values (time-multiseries positions)
   "This function returns a list of the values in a time series or multiseries
-  at the specified positions.  A time multiseries is represented as a list of
-  arrays with identical dimensions, where each array represents a single time
-  step's entire data.  A time series is represented as a list.  The first value
-  in each position is the time position."
+at the specified positions.  A time multiseries is represented as a list of
+arrays with identical dimensions, where each array represents a single time
+step's entire data.  A time series is represented as a list.  The first value
+in each position is the time position."
   (assert (listp positions))
   (setf positions (mapcar #'(lambda (position)
                               (if (listp position)
@@ -1025,10 +1084,10 @@
 
 (defmethod slice ((vector vector) &optional (slice 1))
   "This method returns a slice from a one-dimensional vector; that is, a modular
-  subset of the vector.  For example,
-  > (slice #(1 2 3 4 5 6 7 8 9) 2)
-  => #(1 3 5 7 9)
-   The slice argument may be any positive rational number."
+subset of the vector.  For example,
+> (slice #(1 2 3 4 5 6 7 8 9) 2)
+=> #(1 3 5 7 9)
+The slice argument may be any positive rational number."
   (assert (and (rationalp slice)
                (plusp slice)))
   (let ((index 0)
@@ -1042,10 +1101,10 @@
 
 (defmethod slice ((list list) &optional (slice 1))
   "This method returns a slice from a one-dimensional list; that is, a modular
-  subset of the list.  For example,
-  > (slice '(1 2 3 4 5 6 7 8 9) 2)
-  => '(1 3 5 7 9)
-  The slice argument may be any positive rational number."
+subset of the list.  For example,
+> (slice '(1 2 3 4 5 6 7 8 9) 2)
+=> '(1 3 5 7 9)
+The slice argument may be any positive rational number."
   (assert (and (rationalp slice)
                (plusp slice)))
   (let ((index 0)
