@@ -54,8 +54,8 @@
       :simple-vector-to-list :slice :snap-index :sort-on :sort-order :split
       :strcat :stringify :string-join :strmult :sum :swap :swap-unless
       :swap-when :the-last :time-multiseries :time-multiseries? :time-series?
-      :tms-dimensions :tmsref :tms-values :toggle :unsigned-integer :until
-      :vector-to-list :while :worst)))
+      :tms-dimensions :tmsref :tms-values :to-string :toggle :unsigned-integer
+      :until :vector-to-list :while :worst)))
 (in-package :utilities)
 
 (defun function-alias (function &rest aliases)
@@ -1201,3 +1201,15 @@ The slice argument may be any positive rational number."
              (push #\~ result))
            (push current result))
     (strcat (reverse result))))
+
+(defun to-string (s)
+  "Converts common types of things into a string."
+  (cond ((null s) "")
+        ((symbolp s) (string-downcase (symbol-name s)))
+        ((stringp s) s)
+        (t (format nil "~A" s))))
+
+(assert (equal (to-string nil) ""))
+(assert (equal (to-string :foo) "foo"))
+(assert (equal (to-string "hello") "hello"))
+(assert (equal (to-string "Hello, world!") "Hello, world!"))

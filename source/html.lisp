@@ -53,18 +53,6 @@
 (defun newline ()
   (format t "~%"))
 
-(defun to-string (s)
-  "Converts common types of things into a string."
-  (cond ((null s) "")
-        ((symbolp s) (string-downcase (symbol-name s)))
-        ((stringp s) s)
-        (t (format nil "~A" s))))
-
-(assert (equal (to-string nil) ""))
-(assert (equal (to-string :foo) "foo"))
-(assert (equal (to-string "hello") "hello"))
-(assert (equal (to-string "Hello, world!") "Hello, world!"))
-
 (defun tag-equal? (a b)
   "This is a comparator for two tags."
   (string= (to-string a) (to-string b)))
