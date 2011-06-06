@@ -60,37 +60,41 @@
         ((stringp s) s)
         (t (format nil "~A" s))))
 
+(assert (equal (to-string nil) ""))
+(assert (equal (to-string :foo) "foo"))
+(assert (equal (to-string "hello") "hello"))
+(assert (equal (to-string "Hello, world!") "Hello, world!"))
+
 (defun tag-equal? (a b)
   "This is a comparator for two tags."
-  (string-equal (to-string a) (to-string b)))
+  (string= (to-string a) (to-string b)))
+
+(assert (tag-equal? :foo :foo))
+(assert (not (tag-equal? :foo :bar)))
+(assert (tag-equal? :foo "foo"))
+(assert (not (tag-equal? "foo" "Foo")))
 
 (defun multiline-tag? (tag)
   "This tests to see if this tag should be formatted over
-  multiple lines in the actual HTML output."
+multiple lines in the actual HTML output."
   (member tag '(html head script body form p div ul ol dl table)
           :test #'tag-equal?))
 
 (defun newline-tag? (tag)
   "This tests to see if this tag should be on a line by itself in the actual
-  HTML output."
+HTML output."
   (or (multiline-tag? tag)
       (member tag '(title h1 h2 h3 h4 h5 h6 br hr li dd dt input tr td)
               :test #'tag-equal?)))
 
 (defun tag-must-close? (tag)
   "This predicate indicates if the tag passed in must have a closing tag
-  instead of just self-closing.  That is, you MUST do <tag></tag> even if
-  there isn't any body contained in the tag, and you can't just do <tag/>.
-  As far as I know only the 'link' and 'script' tags are this stupid."
+instead of just self-closing.  That is, you MUST do <tag></tag> even if
+there isn't any body contained in the tag, and you can't just do <tag/>.
+As far as I know only the 'link' and 'script' tags are this stupid."
   (member tag '(link script) :test #'tag-equal?))
 
 (defun html (tag &rest rest)
-  ;; TODO?: (html :tag . fred # bob rest)
-  ;; should do . --> class
-  ;;           # --> id
-  ;; Both should be optional, and order shouldn't matter, but both before 
-  ;; any of the rest is done.  This is loosly based on HAML in Ruby.  Should
-  ;; we do this?
   (let ((args nil)
         (args-count 0)
         (body nil)
@@ -108,7 +112,7 @@
                          (if i i ""))
                        body))
     (labels ((html-format (&rest rest)
-                          "This is our local format."
+                          "This is our local formatter."
                           (setf result (strcat result
                                                (apply #'format nil rest)))))
       (setf tag (to-string tag))
@@ -129,8 +133,8 @@
                                  (to-string (second arg)))))
                   (setf arg (to-string arg))))
               args)
-      (when (or (multiline-tag? tag)
-                (newline-tag? tag))
+      (when (and body (or (multiline-tag? tag)
+                          (newline-tag? tag)))
         (html-format "~%"))
       (html-format "<~A" tag)
       (when args
@@ -147,25 +151,50 @@
                  (not (tag-must-close? tag)))
         (html-format "/"))
       (html-format ">")
-      (when (multiline-tag? tag)
+      (when (and (multiline-tag? tag) body)
         (html-format "~%"))
       (when body
         (mapcar (lambda (line)
                   (html-format (escape-tildes line)))
                 body))
       (when (or body (tag-must-close? tag))
-        (when (multiline-tag? tag)
+        (when (and (multiline-tag? tag) body)
           (html-format "~%"))
         (html-format "</~A>" tag))
-      (when (or (multiline-tag? tag)
-                (newline-tag? tag))
+      (when (and body (or (multiline-tag? tag)
+                          (newline-tag? tag)))
         (html-format "~%"))
       result)))
 
+(assert (equal (html :b "hello there")
+               "<b>hello there</b>"))
+(assert (equal (html :b)
+               "<b/>"))
+(assert (equal (html :p "hello there") "
+<p>
+hello there
+</p>
+"))
+(assert (equal (html :p)
+               "<p/>"))
+(assert (equal (html :title "hello there") "
+<title>hello there</title>
+"))
+(assert (equal (html :title)
+               "<title/>"))
+(assert (equal (html :link)
+               "<link></link>"))
+(assert (equal (html :script)
+               "<script></script>"))
+(assert (equal (html :a '((:href "http://www.cgore.com")) "Chris Gore")
+               "<a href=\"http://www.cgore.com\">Chris Gore</a>"))
+(assert (equal (html :a '(("href" "http://www.cgore.com")) "Chris Gore")
+               "<a href=\"http://www.cgore.com\">Chris Gore</a>"))
+
 (defun html-comment (&rest rest)
   "This generates and HTML style inline comment.  Usually you don't want to
-  even really use this, you should just be using normal Lisp comments in your
-  code, but hey, do what you want."
+even really use this, you should just be using normal Lisp comments in your
+code, but hey, do what you want."
   (apply #'strcat (append '("<!-- ") (mapcar #'to-string rest) '(" -->"))))
 
 (function-alias 'html-comment '!--)
@@ -182,20 +211,20 @@
 (defmacro simple-tag-functor (function-name &optional tag)
   "This macro is used to construct the vast majority of the HTML tag helpers.
 
-  If you want to have:
-    (foo \"some stuff\")
-  give you:
-    \"<foo>some stuff</foo>\"
-  then all you need to do is:
-    (simple-tag-functor :foo)
-  
-  Optionally, if you need to have the function named something different, use
-  the form:
-    (simple-tag-functor :bar :foo)
-  and then
-    (bar \"some stuff\")
-  will generate:
-    \"<foo>some stuff</foo>\""
+If you want to have:
+  (foo \"some stuff\")
+give you:
+  \"<foo>some stuff</foo>\"
+then all you need to do is:
+  (simple-tag-functor :foo)
+
+Optionally, if you need to have the function named something different, use
+the form:
+  (simple-tag-functor :bar :foo)
+and then
+  (bar \"some stuff\")
+will generate:
+  \"<foo>some stuff</foo>\""
   ;;; TODO: There has to be a simpler way to write this macro.
   `(let* ((name (symbol-name ,function-name)) ; The string representation.
           (tag (string-downcase (if ,tag ,tag name)))) ; The tag as a string.
@@ -259,7 +288,7 @@
                                   (second v)
                                   v))
                           (checked? (and checked-value
-                                         (string-equal value checked-value))))
+                                         (string= value checked-value))))
                      (radio-input name value :text text :checked checked?)))
                  values)))
 
