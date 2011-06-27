@@ -1,24 +1,24 @@
 ;;;; Copyright (c) 2005 -- 2011, Christopher Mark Gore,
 ;;;; All rights reserved.
-;;;; 
+;;;;
 ;;;; 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
 ;;;; Web: http://cgore.com
 ;;;; Email: cgore@cgore.com
-;;;; 
+;;;;
 ;;;; Redistribution and use in source and binary forms, with or without
 ;;;; modification, are permitted provided that the following conditions are met:
-;;;; 
+;;;;
 ;;;;     * Redistributions of source code must retain the above copyright
 ;;;;       notice, this list of conditions and the following disclaimer.
-;;;; 
+;;;;
 ;;;;     * Redistributions in binary form must reproduce the above copyright
 ;;;;       notice, this list of conditions and the following disclaimer in the
 ;;;;       documentation and/or other materials provided with the distribution.
-;;;; 
+;;;;
 ;;;;     * Neither the name of Christopher Mark Gore nor the names of other
 ;;;;       contributors may be used to endorse or promote products derived from
 ;;;;       this software without specific prior written permission.
-;;;; 
+;;;;
 ;;;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ;;;; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 ;;;; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,10 +42,11 @@
       :conjoin :curry :decaying-probability? :deletef :disjoin :distance :divf
       :do-until :do-while :duplicate :empty-sequence? :escape-tildes :for
       :forever :fractional-part :fractional-value :function-alias
-      :function-aliases :integer-range :it :list-to-vector :maximum :maximum?
-      :minimum :minimum?  :multf :multicond :nconcf :next-point :nonnegative?
+      :function-aliases :integer-range :it :join-symbol-to-all-preceeding
+      :join-symbol-to-all-following :list-to-vector :maximum :maximum? :minimum
+      :minimum? :multf :multicond :nconcf :next-point :nonnegative?
       :nonnegative-float :nonnegative-integer :nonnegative-integer? :norm
-      :nshuffle :nthable?  :nth-from-end :operator-to-function :opf
+      :nshuffle :nthable? :nth-from-end :operator-to-function :opf
       :otherwise-nil :positive-float :positive-integer :positive-integer?
       :prepackage :probability :probability? :product :random-array
       :random-element :random-in-range :random-in-ranges :randomize-array
@@ -54,8 +55,8 @@
       :simple-vector-to-list :slice :snap-index :sort-on :sort-order :split
       :strcat :stringify :string-join :strmult :sum :swap :swap-unless
       :swap-when :the-last :time-multiseries :time-multiseries? :time-series?
-      :tms-dimensions :tmsref :tms-values :to-string :toggle :unsigned-integer
-      :until :vector-to-list :while :worst)))
+      :tms-dimensions :tmsref :tms-values :to-string :toggle :unimplemented
+      :unsigned-integer :until :vector-to-list :while :worst)))
 (in-package :utilities)
 
 (defun function-alias (function &rest aliases)
@@ -1213,3 +1214,71 @@ The slice argument may be any positive rational number."
 (assert (equal (to-string :foo) "foo"))
 (assert (equal (to-string "hello") "hello"))
 (assert (equal (to-string "Hello, world!") "Hello, world!"))
+
+(defun join-symbol-to-all-preceeding (symbol list)
+  "This function takes a symbol and a list, and for every occurance of the
+symbol in the list, it joins it to the item preceeding it.  For example:
+> (join-symbol-to-all-preceeding :% '(10 :% 20 :% 30 :%))
+=> '(:10% :20% :30%)"
+  (assert (symbolp symbol))
+  (assert (listp list))
+  (aif (position symbol list)
+    ;;; There is at least one instance of the symbol in the list.  We will
+    ;;; therefore remove it and modify the previous item.
+    (progn
+      (assert (<= 1 it))
+      (let ((previous (nth (1- it) list)))
+        (setf (nth (1- it) list)
+              (intern (format nil "~A~A" previous (to-string symbol))
+                      "KEYWORD"))
+        ;; Recursively apply the modification to the entire list.
+        (join-symbol-to-all-preceeding symbol (remove symbol list :count 1))))
+    ;; Otherwise, we have no instances of the specified symbol in the list.
+    ;; Just return the list passed in unmodified.
+    list))
+
+(assert (equal (join-symbol-to-all-preceeding :% '(100 :%))
+               '(:100%)))
+(assert (equal (join-symbol-to-all-preceeding :% '(10 :% 20 :% 30 :%))
+               '(:10% :20% :30%)))
+(assert (equal (join-symbol-to-all-preceeding :% '(10 :55%))
+               '(10 :55%)))
+(assert (equal (join-symbol-to-all-preceeding :% '(1 2 3 4 5))
+               '(1 2 3 4 5)))
+(assert (equal (join-symbol-to-all-preceeding :% '(:a :b :c :d :e))
+               '(:a :b :c :d :e)))
+
+(defun join-symbol-to-all-following (symbol list)
+  "This function takes a symbol and a list, and for every occurance of the
+symbol in the list, it joins it to the item following it.  For example:
+> (join-symbol-to-all-following :# '(:# 10 :# 20 :# 30))
+=> '(:#10 :#20 :#30)"
+  (assert (symbolp symbol))
+  (assert (listp list))
+  (aif (position symbol list)
+    ;;; There is at least one instance of the symbol in the list.  We will
+    ;;; therefore remove it and modify the previous item.
+    (progn
+      (assert (< it (length list)))
+      (let ((next (nth (1+ it) list)))
+        (setf (nth (1+ it) list)
+              (intern (format nil "~A~A" (to-string symbol) next) "KEYWORD"))
+        ;; Recursively apply the modification to the entire list.
+        (join-symbol-to-all-following symbol (remove symbol list :count 1))))
+    ;; Otherwise, we have no instances of the specified symbol in the list.
+    ;; Just return the list passed in unmodified.
+    list))
+
+(assert (equal (join-symbol-to-all-following :# '(:# :aabbcc))
+               '(:#aabbcc)))
+(assert (equal (join-symbol-to-all-following :# '(:# 10 :# 20 :# 30))
+               '(:#10 :#20 :#30)))
+(assert (equal (join-symbol-to-all-following :# '(:#55 10))
+               '(:#55 10)))
+(assert (equal (join-symbol-to-all-following :# '(1 2 3 4 5))
+               '(1 2 3 4 5)))
+(assert (equal (join-symbol-to-all-following :# '(:a :b :c :d :e))
+               '(:a :b :c :d :e)))
+
+(defun unimplemented ()
+  (assert nil))
