@@ -31,7 +31,7 @@
 ;;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;;; POSSIBILITY OF SUCH DAMAGE.
 
-(load "utilities")
+(load "utilities/utilities")
 (defpackage :html
   (:use :common-lisp #+sbcl :sb-ext :utilities)
   (:export :!-- :abbr :acronym :b :base :basic-webpage :body :book-title :br

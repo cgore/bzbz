@@ -31,7 +31,7 @@
 ;;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;;; POSSIBILITY OF SUCH DAMAGE.
 
-(load "utilities")
+(load "utilities/utilities")
 (load "html")
 (defpackage :site
   (:use :common-lisp
@@ -56,7 +56,7 @@
        (href "http://www.cgore.com" "cgore.com")
        (mailto "cgore@cgore.com" "cgore@cgore.com")
        (href "http://www.cgore.com/programming/lisp/bzbz/" "BzBz")
-       (href "https://github.com/cgore/bzbz" "BzBz on Github")
+       (href "https://github.com/cgore/bzbz" "BzBz on Github")))
 
 (defparameter *include-advertisements* t)
 
