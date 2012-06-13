@@ -31,12 +31,14 @@
 ;;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;;; POSSIBILITY OF SUCH DAMAGE.
 
-(load "utilities/utilities")
+(require :asdf)
+(asdf:load-system "cgore-utilities")
+
 (load "html")
 (defpackage :site
   (:use :common-lisp
         #+sbcl :sb-ext
-        :utilities
+        :cgore-utilities
         :html)
   (:export :left-menu
            :*include-advertisements*
