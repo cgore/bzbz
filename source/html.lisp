@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2005 -- 2011, Christopher Mark Gore,
+;;;; Copyright (c) 2005 -- 2012, Christopher Mark Gore,
 ;;;; All rights reserved.
 ;;;; 
 ;;;; 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
@@ -92,7 +92,7 @@ HTML output."
 instead of just self-closing.  That is, you MUST do <tag></tag> even if
 there isn't any body contained in the tag, and you can't just do <tag/>.
 As far as I know only the 'link' and 'script' tags are this stupid."
-  (member tag '(link script) :test #'tag-equal?))
+  (member tag '(iframe link script) :test #'tag-equal?))
 
 (defun html (tag &rest rest)
   (let ((args nil)
