@@ -1,4 +1,5 @@
-;;;; Copyright (c) 2005-2010, Christopher Mark Gore,
+;;;; Copyright (c) 2005-2013, Christopher Mark Gore,
+;;;; Soli Deo Gloria,
 ;;;; All rights reserved.
 ;;;; 
 ;;;; 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
@@ -32,13 +33,12 @@
 ;;;; POSSIBILITY OF SUCH DAMAGE.
 
 (require :asdf)
-(asdf:load-system "cgore-utilities")
+(require :cgore-utilities)
 
 (load "html")
 (defpackage :site
   (:use :common-lisp
         #+sbcl :sb-ext
-        :cgore-utilities
         :html)
   (:export :left-menu
            :*include-advertisements*
@@ -46,6 +46,7 @@
            :webpage-template
            :webpage))
 (in-package :site)
+(utilities:use-all-cgore-utilities)
 
 (defun site-name () "New BzBz Installation")
 
@@ -60,6 +61,7 @@
        (href "http://www.cgore.com/programming/lisp/bzbz/" "BzBz")
        (href "https://github.com/cgore/bzbz" "BzBz on Github")))
 
+;;; Set this to nil if you don't want to include any advertisements.
 (defparameter *include-advertisements* t)
 
 (defun wide-skyscraper-ad ()
