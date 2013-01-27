@@ -1,4 +1,5 @@
-;;;; Copyright (c) 2005 -- 2012, Christopher Mark Gore,
+;;;; Copyright (c) 2005 -- 2013, Christopher Mark Gore,
+;;;; Soli Deo Gloria,
 ;;;; All rights reserved.
 ;;;; 
 ;;;; 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
@@ -31,7 +32,9 @@
 ;;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;;; POSSIBILITY OF SUCH DAMAGE.
 
-(load "utilities/utilities")
+(require :asdf)
+(require :cgore-utilities)
+
 (defpackage :html
   (:use :common-lisp #+sbcl :sb-ext :utilities)
   (:export :!-- :abbr :acronym :b :base :basic-webpage :body :book-title :br
@@ -46,24 +49,14 @@
     :site-css ; NOTE: You need to redefine this one locally.
     :site-name ; NOTE: You need to redefine this one locally.
     :source :standard-head :strong :sub :submit-input :sup :table :tag-equal?
-    :tag-must-close?  :td :text-input :th :title?  :to-string :tr :tt :ul
+    :tag-must-close?  :td :text-input :th :title? :tr :tt :ul
     :ul-from-list :ul-from-rest :ul-href :url-decode :webpage-without-login))
 (in-package :html)
 
+(utilities:use-all-cgore-utilities)
+
 (defun newline ()
   (format t "~%"))
-
-(defun to-string (s)
-  "Converts common types of things into a string."
-  (cond ((null s) "")
-        ((symbolp s) (string-downcase (symbol-name s)))
-        ((stringp s) s)
-        (t (format nil "~A" s))))
-
-(assert (equal (to-string nil) ""))
-(assert (equal (to-string :foo) "foo"))
-(assert (equal (to-string "hello") "hello"))
-(assert (equal (to-string "Hello, world!") "Hello, world!"))
 
 (defun tag-equal? (a b)
   "This is a comparator for two tags."
