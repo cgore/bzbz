@@ -1,8 +1,9 @@
 #! /usr/bin/env runlisp
-
+;;;; -*- Mode: Lisp; -*-
 ;;;; vim: filetype=lisp
 
-;;;; Copyright (c) 2005-2010, Christopher Mark Gore,
+;;;; Copyright (c) 2005-2013, Christopher Mark Gore,
+;;;; Soli Deo Gloria,
 ;;;; All rights reserved.
 ;;;; 
 ;;;; 8729 Lower Marine Road, Saint Jacob, Illinois 62281 USA.
@@ -35,9 +36,12 @@
 ;;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;;; POSSIBILITY OF SUCH DAMAGE.
 
+(require :asdf)
+(require :cgore-utilities)
+(utilities:use-all-cgore-utilities)
+
 (load "site")
 
-(use-package :utilities)
 (use-package :html)
 (use-package :site)
 
